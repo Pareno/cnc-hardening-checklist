@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNC Security Hardening Checklist Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #e0e6ff;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #73e9e97a, #7cc0d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #a0a8d8;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(115, 233, 233, 0.2);
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 0.9rem;
+            color: #a0a8d8;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select, input[type="text"] {
+            padding: 0.75rem;
+            border: 1px solid rgba(115, 233, 233, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+            color: #e0e6ff;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #73e9e97a;
+            background: rgba(115, 233, 233, 0.1);
+            box-shadow: 0 0 0 3px rgba(115, 233, 233, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid rgba(115, 233, 233, 0.4);
+            background: rgba(115, 233, 233, 0.1);
+            color: #73e9e97a;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: rgba(115, 233, 233, 0.2);
+            border-color: #73e9e97a;
+        }
+
+        button.active {
+            background: #73e9e97a;
+            color: #0a0e27;
+            border-color: #73e9e97a;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(115, 233, 233, 0.1);
+            border: 1px solid rgba(115, 233, 233, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #73e9e97a, #7cc0d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #a0a8d8;
+            margin-top: 0.5rem;
+        }
+
+        .checklist-container {
+            display: grid;
+            gap: 1rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .category-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(115, 233, 233, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .category-header {
+            padding: 1.25rem;
+            background: linear-gradient(135deg, rgba(115, 233, 233, 0.15), rgba(124, 192, 212, 0.1));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            border-bottom: 1px solid rgba(115, 233, 233, 0.2);
+        }
+
+        .category-header:hover {
+            background: linear-gradient(135deg, rgba(115, 233, 233, 0.2), rgba(124, 192, 212, 0.15));
+        }
+
+        .category-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .category-icon {
+            font-size: 1.3rem;
+            color: #73e9e97a;
+        }
+
+        .category-count {
+            font-size: 0.85rem;
+            color: #a0a8d8;
+            background: rgba(115, 233, 233, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            margin: 0 0.75rem;
+        }
+
+        .toggle-icon {
+            font-size: 1rem;
+            color: #73e9e97a;
+            transition: transform 0.3s ease;
+        }
+
+        .category-section.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        .checklist-items {
+            padding: 1rem;
+            background: rgba(10, 14, 39, 0.5);
+            display: none;
+        }
+
+        .category-section.expanded .checklist-items {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .checklist-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(115, 233, 233, 0.1);
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .checklist-item:hover {
+            background: rgba(115, 233, 233, 0.08);
+            border-color: rgba(115, 233, 233, 0.3);
+        }
+
+        .checklist-item.completed {
+            background: rgba(115, 233, 233, 0.1);
+            border-color: rgba(115, 233, 233, 0.4);
+        }
+
+        .item-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            cursor: pointer;
+            margin-bottom: 0.75rem;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: #73e9e97a;
+        }
+
+        .item-title {
+            font-weight: 600;
+            color: #e0e6ff;
+            flex: 1;
+        }
+
+        .item-toggle {
+            cursor: pointer;
+            color: #a0a8d8;
+            transition: transform 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .item-toggle.active {
+            transform: rotate(180deg);
+            color: #73e9e97a;
+        }
+
+        .item-details {
+            display: none;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(115, 233, 233, 0.15);
+        }
+
+        .item-details.visible {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .detail-block {
+            font-size: 0.85rem;
+        }
+
+        .detail-label {
+            color: #a0a8d8;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 0.3rem;
+            font-size: 0.75rem;
+        }
+
+        .detail-value {
+            color: #e0e6ff;
+        }
+
+        .difficulty-low {
+            color: #4ade80;
+        }
+
+        .difficulty-medium {
+            color: #fbbf24;
+        }
+
+        .difficulty-high {
+            color: #f87171;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .badge-low {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+        }
+
+        .badge-medium {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+
+        .badge-high {
+            background: rgba(248, 113, 113, 0.2);
+            color: #f87171;
+        }
+
+        .resource-link {
+            color: #73e9e97a;
+            text-decoration: none;
+            border-bottom: 1px dotted rgba(115, 233, 233, 0.5);
+            transition: all 0.2s ease;
+        }
+
+        .resource-link:hover {
+            color: #7cc0d4;
+            border-bottom-color: #7cc0d4;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 0.85rem 1.75rem;
+            background: linear-gradient(135deg, rgba(115, 233, 233, 0.2), rgba(124, 192, 212, 0.1));
+            border: 1px solid rgba(115, 233, 233, 0.4);
+            color: #73e9e97a;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, rgba(115, 233, 233, 0.3), rgba(124, 192, 212, 0.2));
+            border-color: #73e9e97a;
+            box-shadow: 0 0 20px rgba(115, 233, 233, 0.2);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #a0a8d8;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(115, 233, 233, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #73e9e97a, #7cc0d4);
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .item-details.visible {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1> CNC Security Hardening Checklist
+            </h1>
+            <p class="subtitle">Manufacturing Security Expert | OT/IT Security Framework</p>
+            <p style="color: #7cc0d4; font-size: 0.9rem;">Comprehensive hardening guide for CNC systems and manufacturing facilities</p>
+        </header>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="categoryFilter">Filter by Category</label>
+                <select id="categoryFilter">
+                    <option value="">All Categories</option>
+                    <option value="network">Network & Segmentation</option>
+                    <option value="authentication">Authentication & Access</option>
+                    <option value="perimeter">Perimeter Protection</option>
+                    <option value="endpoint">Endpoint Security</option>
+                    <option value="data">Data Protection</option>
+                    <option value="physical">Physical Security</option>
+                    <option value="incident">Incident Response</option>
+                    <option value="compliance">Compliance</option>
+                    <option value="backup">Backup & Recovery</option>
+                    <option value="supply">Supply Chain</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="difficultyFilter">Difficulty Level</label>
+                <select id="difficultyFilter">
+                    <option value="">All Levels</option>
+                    <option value="low">Low Complexity</option>
+                    <option value="medium">Medium Complexity</option>
+                    <option value="high">High Complexity</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="searchInput">Search Items</label>
+                <input type="text" id="searchInput" placeholder="Search by keyword...">
+            </div>
+
+            <div class="control-group">
+                <label>Quick Actions</label>
+                <div class="button-group">
+                    <button onclick="expandAll()">Expand All</button>
+                    <button onclick="collapseAll()">Collapse All</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-value" id="totalItems">0</div>
+                <div class="stat-label">Total Items</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="completedItems">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="completionPercent">0%</div>
+                <div class="stat-label">Progress</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="remainingItems">0</div>
+                <div class="stat-label">Remaining</div>
+            </div>
+        </div>
+
+        <div class="checklist-container" id="checklistContainer"></div>
+
+        <div class="action-buttons">
+            <button class="action-btn" onclick="resetProgress()">
+                <i class="fas fa-redo"></i> Reset Progress
+            </button>
+            <button class="action-btn" onclick="exportAsText()">
+                <i class="fas fa-download"></i> Export Checklist
+            </button>
+            <button class="action-btn" onclick="window.print()">
+                <i class="fas fa-print"></i> Print Checklist
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const checklistData = [
+            {
+                category: 'network',
+                icon: 'fas fa-network-wired',
+                title: 'Network & OT/IT Segmentation',
+                items: [
+                    {
+                        title: 'Implement OT/IT Network Segmentation',
+                        description: 'Create air-gap or logical separation between operational technology (CNC, PLCs) and IT networks',
+                        difficulty: 'high',
+                        time: '2-3 weeks',
+                        cost: 'high',
+                        tools: ['Cisco Switch ACLs', 'Fortinet FortiGate', 'Palo Alto Networks'],
+                        resources: ['IEC 62443 Part 3-3', 'NIST Cybersecurity Framework']
+                    },
+                    {
+                        title: 'Deploy VLAN Segmentation for CNC Systems',
+                        description: 'Separate CNC machines, controllers, and support systems into dedicated VLANs with access restrictions',
+                        difficulty: 'medium',
+                        time: '1-2 weeks',
+                        cost: 'medium',
+                        tools: ['VLAN Configuration', 'Network Switches', 'SNMP Monitoring'],
+                        resources: ['IEEE 802.1Q Standard']
+                    },
+                    {
+                        title: 'Configure Zero-Trust Network Access',
+                        description: 'Implement least-privilege access with continuous verification for all CNC network access',
+                        difficulty: 'high',
+                        time: '3-4 weeks',
+                        cost: 'high',
+                        tools: ['Cisco ISE', 'CrowdStrike', 'Zscaler'],
+                        resources: ['NIST Zero Trust Architecture SP 800-207']
+                    },
+                    {
+                        title: 'Monitor Network Traffic on CNC Subnet',
+                        description: 'Deploy packet capture and analysis for anomaly detection on CNC network segment',
+                        difficulty: 'medium',
+                        time: '1 week',
+                        cost: 'medium',
+                        tools: ['Wireshark', 'Zeek IDS', 'Suricata'],
+                        resources: ['SANS Packet Analysis Guide']
+                    },
+                    {
+                        title: 'Disable Unnecessary Network Services',
+                        description: 'Remove unused protocols and services from CNC controllers (NetBIOS, SNMP, telnet)',
+                        difficulty: 'low',
+                        time: '2-3 days',
+                        cost: 'low',
+                        tools: ['System Configuration Tools', 'Network Device Managers'],
+                        resources: ['CIS Benchmarks']
+                    }
+                ]
+            },
+            {
+                category: 'authentication',
+                icon: 'fas fa-key',
+                title: 'Authentication & Access Control',
+                items: [
+                    {
+                        title: 'Implement Multi-Factor Authentication (MFA)',
+                        description: 'Enforce MFA for all administrative access to CNC controllers, SCADA, and manufacturing systems',
+                        difficulty: 'high',
+                        time: '2-3 weeks',
+                        cost: 'medium',
+                        tools: ['Microsoft Entra ID', 'Okta', 'Duo Security'],
+                        resources: ['NIST SP 800-63B - Digital Identity Guidelines']
+                    },
+                    {
+                        title: 'Deploy Role-Based Access Control (RBAC)',
+                        description: 'Define and implement granular roles (operator, maintenance, admin) with principle of least privilege',
+                        difficulty: 'medium',
+                        time: '2 weeks',
+                        cost: 'low',
+                        tools: ['Active Directory', 'LDAP', 'Policy Management Systems'],
+                        resources: ['NIST SP 800-53 AC-2']
+                    },
+                    {
+                        title: 'Enforce Strong Password Policies',
+                        description: 'Implement minimum 12-character passwords with complexity, rotation every 90 days for CNC systems',
+                        difficulty: 'low',
+                        time: '1 week',
+                        cost: 'low',
+                        tools: ['Password Policy Manager', 'Active Directory Group Policy'],
+                        resources: ['NIST SP 800-63B Password Guidelines']
+                    },
+                    {
+                        title: 'Audit and Restrict Privileged Accounts',
+                        description: 'Identify, document, and monitor all privileged accounts with automated access reviews',
+                        difficulty: 'medium',
+                        time: '2 weeks',
+                        cost: 'medium',
+                        tools: ['BeyondTrust Privilege Manager', 'CyberArk', 'Delinea Secrets Server'],
+                        resources: ['SANS Access Control Audit Guide']
+                    },
+                    {
+                        title: 'Implement Account Lockout Policies',
+                        description: 'Configure lockout after failed login attempts to prevent brute-force attacks on CNC interfaces',
+                        difficulty: 'low',
+                        time: '3 days',
+                        cost: 'low',
+                        tools: ['System Policy Management', 'Controller Configuration'],
+                        resources: ['NIST SP 800-53 AC-7']
+                    }
+                ]
+            },
+            {
+                category: 'perimeter',
+                icon: 'fas fa-shield-alt',
+                title: 'Perimeter Protection',
+                items: [
+                    {
+                        title: 'Deploy Industrial Firewalls',
+                        description: 'Install stateful firewalls with protocol-aware inspection for CNC communications',
+                        difficulty: 'high',
+                        time: '2-3 weeks',
+                        cost: 'high',
+                        tools: ['Fortinet FortiGate', 'Cisco ASA', 'Palo Alto Networks'],
+                        resources: ['IEC 62443-3-3 - System Security Requirements']
+                    },
+                    {
+                        title: 'Configure Firewall Rules for CNC Systems',
+                        description: 'Whitelist only necessary ports/protocols for CNC operation (Modbus, Profibus, Profinet, EtherCAT)',
+                        difficulty: 'medium',
+                        time: '1-2 weeks',
+                        cost: 'low',
+                        tools: ['Firewall Configuration Tools', 'Protocol Analyzers'],
+                        resources: ['IEC 61131 - PLC Standards']
+                    },
+                    {
+                        title: 'Implement Intrusion Detection System (IDS)',
+                        description: 'Deploy network IDS to detect anomalous traffic patterns on CNC networks',
+                        difficulty: 'high',
+                        time: '2-3 weeks',
+                        cost: 'medium',
+                        tools: ['Snort', 'Suricata', 'Zeek', 'Cisco IDS'],
+                        resources: ['NIST SP 800-94 IDS Deployment Guide']
+                    },
+                    {
+                        title: 'Establish DMZ for Remote Access',
+                        description: 'Create isolated network zone for VPN or remote maintenance with strict access controls',
+                        difficulty: 'high',
+                        time: '3 weeks',
+                        cost: 'high',
+                        tools: ['VPN Appliances', 'Bastion Hosts', 'Jump Servers'],
+                        resources: ['NIST SP 800-52 TLS Guidelines']
+                    },
+                    {
+                        title: 'Deploy Web Application Firewall (WAF)',
+                        description: 'Protect web-based CNC interfaces from injection attacks and malicious requests',
+                        difficulty: 'medium',
+                        time: '1 week',
+                        cost: 'medium',
+                        tools: ['ModSecurity', 'Cloudflare WAF', 'AWS WAF'],
+                        resources: ['OWASP Top 10']
+                    }
+                ]
+            },
+            {
+                category: 'endpoint',
+                icon: 'fas fa-desktop',
+                title: 'Endpoint & Machine Security',
+                items: [
+                    {
+                        title: 'Harden CNC Controller Operating Systems',
+                        description: 'Disable unnecessary services, apply security baselines, and configure host-based firewalls',
+                        difficulty: 'high',
+                        time: '2-3 weeks',
+                        cost: 'low',
+                        tools: ['CIS Benchmarks', 'Windows Hardening Tools', 'Linux Security Modules'],
+                        resources: ['NIST SP 800-53 CM-2 Baseline Configuration']
+                    },
+                    {
+                        title: 'Deploy Host-Based Intrusion Prevention (HIPS)',
+                        description: 'Install endpoint detection on CNC and supervisory computers to monitor for malicious behavior',
+                        difficulty: 'medium',
+                        time: '1-2 weeks',
+                        cost: 'medium',
+                        tools: ['Wazuh', 'Osquery', 'Tripwire', 'Rapid7 InsightAgent'],
+                        resources: ['NIST SP 800-94']
+                    },
+                    {
+                        title: 'Patch Management Program for CNC Systems',
+                        description: 'Establish controlled patch schedule with testing before deployment to production systems',
+                        difficulty: 'medium',
+                        time: '2 weeks',
+                        cost: 'low',
+                        tools: ['WSUS', 'Ansible', 'Puppet', 'Chef'],
+                        resources: ['NIST SP 800-40 Rev. 4 Patch Management']
+                    },
+                    {
+                        title: 'Implement Application Whitelisting',
+                        description: 'Only allow authorized applications on CNC controllers and engineering workstations',
+                        difficulty: 'high',
+                        time: '3 weeks',
+                        cost: 'medium',
+                        tools: ['AppLocker', 'Kaspersky', 'Bit9 + Carbon Black'],
+                        resources: ['NIST SP 800-167 Application Whitelisting']
+                    },
+                    {
+                        title: 'Deploy USB and Removable Media Controls',
+                        description: 'Restrict or monitor USB access on CNC systems to prevent malware introduction',
+                        difficulty: 'low',
+                        time: '1 week',
+                        cost: 'low',
+                        tools: ['Group Policy', 'Device Control Software', 'BIOS Settings'],
+                        resources: ['SANS Media Handling Guide']
+                    }
+                ]
+            },
+            {
+                category: 'data',
+                icon: 'fas fa-lock',
+                title: 'Data Protection & Communication',
+                items: [
+                    {
+                        title: 'Encrypt CNC Data in Transit',
+                        description: 'Use TLS/SSL 1.2+ for all administrative communications with CNC controllers',
+                        difficulty: 'high',
+                        time: '2-3 weeks',
+                        cost: 'medium',
+                        tools: ['OpenSSL', 'Let\'s Encrypt', 'Palo Alto Networks'],
+                        resources: ['NIST SP 800-52 Rev. 2 TLS Guidelines']
+                    },
+                    {
+                        title: 'Implement CNC Data Encryption at Rest',
+                        description: 'Encrypt sensitive manufacturing data, program files, and configuration backups',
+                        difficulty: 'medium',
+                        time: '1-2 weeks',
+                        cost: 'low',
+                        tools: ['BitLocker', 'LUKS', 'VeraCrypt', 'Hardware Security Modules'],
+                        resources: ['NIST SP 800-175B Encryption Standard']
+                    },
+                    {
+                        title: 'Disable Insecure Protocols',
+                        description: 'Remove Telnet, HTTP, Modbus (unencrypted) in favor of secure alternatives (SSH, HTTPS)',
+                        difficulty: 'medium',
+                        time: '2 weeks',
+                        cost: 'low',
+                        tools: ['Protocol Configuration Tools', 'Network Analysis'],
+                        resources: ['IEC 62443 Protocol Security']
+                    },
+                    {
+                        title: 'Implement Data Loss Prevention (DLP)',
+                        description: 'Monitor and control exfiltration of CNC programs, designs, and sensitive manufacturing data',
+                        difficulty: 'high',
+                        time: '3 weeks',
+                        cost: 'high',
+                        tools: ['Symantec DLP', 'Forcepoint', 'Digital Guardian'],
+                        resources: ['NIST SP 800-188 Data Security']
+                    },
+                    {
+                        title: 'Enable Secure Remote Access for Maintenance',
+                        description: 'Require encrypted, authenticated remote sessions for authorized vendor/contractor access',
+                        difficulty: 'medium',
+                        time: '1-2 weeks',
+                        cost: 'medium',
+                        tools: ['VPN Solutions', 'SSH', 'Secure Remote Access Platforms'],
+                        resources: ['NIST SP 800-52']
+                    }
+                ]
+            },
+            {
+                category: 'physical',
+                icon: 'fas fa-building',
+                title: 'Physical Security',
+                items: [
+                    {
+                        title: 'Secure CNC Machine Access with Badge Systems',
+                        description: 'Implement badge readers or biometric access for physical machine rooms',
+                        difficulty: 'medium',
+                        time: '2 weeks',
+                        cost: 'medium',
+                        tools: ['Badge Access Systems', 'Biometric Scanners', 'CCTV Integration'],
+                        resources: ['ISO 27001:2022 A.11 Physical Security']
+                    },
+                    {
+                        title: 'Implement Surveillance & Monitoring',
+                        description: 'Deploy CCTV in machine rooms with tamper-proof recordings for forensic evidence',
+                        difficulty: 'medium',
+                        time: '1-2 weeks',
+                        cost: 'medium',
+                        tools: ['CCTV Systems', 'NVR Storage', 'Video Analytics'],
+                        resources: ['ISO 27001 A.11.7 CCTV']
+                    },
+                    {
+                        title: 'Lock Down CNC Console Access',
+                        description: 'Use lockable console cages or server racks to prevent unauthorized physical access',
+                        difficulty: 'low',
+                        time: '1 week',
+                        cost: 'low',
+                        tools: ['Server Racks', 'Lockable Enclosures', 'Cable Locks'],
+                        resources: ['ISO 27001 Physical Security Controls']
+                    },
+                    {
+                        title: 'Secure Cable Management & Port Access',
+                        description: 'Label, protect, and monitor network and power cables; disable unused physical ports',
+                        difficulty: 'low',
+                        time: '1 week',
+                        cost: 'low',
+                        tools: ['Cable Management Tools', 'Port Disable Switches'],
+                        resources: ['Manufacturing Security Best Practices']
+                    },
+                    {
+                        title: 'Control Visitor & Contractor Access',
+                        description: 'Implement escort policies, visitor logs, and background checks for machine room access',
+                        difficulty: 'low',
+                        time: '3 days',
+                        cost: 'low',
+                        tools: ['Visitor Management System', 'Access Logs'],
+                        resources: ['ISO 27001 A.11.2 Personnel']
+                    }
+                ]
+            },
+            {
+                category: 'incident',
+                icon: 'fas fa-exclamation-circle',
+                title: 'Incident Response & Forensics Readiness',
+                items: [
+                    {
+                        title: 'Develop CNC-Specific Incident Response Plan',
+                        description: 'Create playbook for ransomware, malware, and operational disruption incidents on CNC systems',
+                        difficulty: 'medium',
+                        time: '2-3 weeks',
+                        cost: 'low',
+                        tools: ['Documentation Tools', 'Incident Management Software'],
+                        resources: ['NIST SP 800-61 Computer Security Incident Handling']
+                    },
+                    {
+                        title: 'Enable Forensic Logging on CNC Systems',
+                        description: 'Configure detailed audit logs for all machine commands, user access, and configuration changes',
+                        difficulty: 'medium',
+                        time: '1-2 weeks',
+                        cost: 'low',
+                        tools: ['Syslog', 'Auditd', 'Windows Event Forwarding'],
+                        resources: ['NIST SP 800-92 Log Management Guidance']
+                    },
+                    {
+                        title: 'Establish Centralized Log Management',
+                        description: 'Aggregate CNC, firewall, and controller logs to SIEM for analysis and incident correlation',
+                        difficulty: 'high',
+                        time: '3-4 weeks',
+                        cost: 'high',
+                        tools: ['Splunk', 'ELK Stack', 'ArcSight', 'Sumo Logic'],
+                        resources: ['NIST SP 800-92']
+                    },
+                    {
+                        title: 'Create Forensic Evidence Collection Procedures',
+                        description: 'Document chain of custody, disk imaging, memory capture, and network packet preservation',
+                        difficulty: 'high',
+                        time: '2-3 weeks',
+                        cost: 'low',
+                        tools: ['Forensic Toolkits', 'dd/ddrescue', 'EnCase', 'FTK'],
+                        resources: ['NIST SP 800-86 Digital Forensics']
+                    },
+                    {
+                        title: 'Conduct Security Incident Drills',
+                        description: 'Run tabletop exercises quarterly to test response procedures and team readiness',
+                        difficulty: 'low',
+                        time: '2 weeks (setup)',
+                        cost: 'low',
+                        tools: ['Collaboration Tools', 'Incident Management Platform'],
+                        resources: ['NIST IR 7628 Manufacturing Sector Guidance']
+                    }
+                ]
+            },
+            {
+                category: 'compliance',
+                icon: 'fas fa-clipboard-check',
+                title: 'Compliance & Documentation',
+                items: [
+                    {
+                        title: 'Assess Compliance with IEC 62443',
+                        description: 'Perform gap analysis against international standard for manufacturing security',
+                        difficulty: 'high',
+                        time: '3-4 weeks',
+                        cost: 'medium',
+                        tools: ['IEC 62443 Assessment Frameworks', 'Audit Tools'],
+                        resources: ['IEC 62443 Series (1-4)']
+                    },
+                    {
+                        title: 'Document Security Architecture',
+                        description: 'Create network diagrams, data flows, and security control documentation for compliance',
+                        difficulty: 'medium',
+                        time: '2-3 weeks',
+                        cost: 'low',
+                        tools: ['Visio', 'Lucidchart', 'Drawio'],
+                        resources: ['NIST SP 800-53 Documentation Requirements']
+                    },
+                    {
+                        title: 'Maintain System Security Plan (SSP)',
+                        description: 'Document all controls, risks, and mitigation strategies in authorized system security plan',
+                        difficulty: 'medium',
+                        time: '2-3 weeks',
+                        cost: 'low',
+                        tools: ['Documentation Tools', 'CMMC Framework'],
+                        resources: ['NIST SP 800-18 SSP Development']
+                    },
+                    {
+                        title: 'Implement Asset Inventory Management',
+                        description: 'Maintain complete inventory of CNC machines, controllers, software, and configuration versions',
+                        difficulty: 'low',
+                        time: '1-2 weeks',
+                        cost: 'low',
+                        tools: ['ServiceNow', 'Qualys CMDB', 'Lansweeper'],
+                        resources: ['NIST SP 800-53 CM-2 Asset Management']
+                    },
+                    {
+                        title: 'Conduct Regular Security Audits',
+                        description: 'Schedule quarterly compliance audits and third-party penetration testing of CNC systems',
+                        difficulty: 'medium',
+                        time: '1-2 weeks (setup)',
+                        cost: 'high',
+                        tools: ['Audit Management Tools', 'Penetration Testing Platforms'],
+                        resources: ['NIST SP 800-53 Audit & Accountability Controls']
+                    }
+                ]
+            },
+            {
+                category: 'backup',
+                icon: 'fas fa-database',
+                title: 'Backup & Disaster Recovery',
+                items: [
+                    {
+                        title: 'Establish Backup Strategy for CNC Programs',
+                        description: 'Implement regular, encrypted backups of machine programs, configurations, and parameters',
+                        difficulty: 'medium',
+                        time: '1-2 weeks',
+                        cost: 'medium',
+                        tools: ['Backup Software', 'Cloud Storage', 'NAS Systems'],
+                        resources: ['NIST SP 800-34 Disaster Recovery Planning']
+                    },
+                    {
+                        title: 'Create Offline Backup Repository',
+                        description: 'Maintain air-gapped backups of critical CNC configurations protected from ransomware',
+                        difficulty: 'medium',
+                        time: '1 week',
+                        cost: 'low',
+                        tools: ['External Hard Drives', 'Tape Systems', 'Offline Storage'],
+                        resources: ['3-2-1 Backup Rule']
+                    },
+                    {
+                        title: 'Test Backup Recovery Procedures',
+                        description: 'Conduct monthly restore tests to ensure recovery time objectives (RTO) are achievable',
+                        difficulty: 'low',
+                        time: '1-2 weeks (setup)',
+                        cost: 'low',
+                        tools: ['Backup Verification Tools', 'Test Lab'],
+                        resources: ['NIST SP 800-34 Recovery Testing']
+                    },
+                    {
+                        title: 'Document Disaster Recovery Plan',
+                        description: 'Create procedures for rapid restoration of CNC operations after ransomware or hardware failure',
+                        difficulty: 'low',
+                        time: '2 weeks',
+                        cost: 'low',
+                        tools: ['Documentation Tools'],
+                        resources: ['NIST Business Continuity Planning']
+                    },
+                    {
+                        title: 'Establish Redundant CNC Controllers',
+                        description: 'Deploy backup CNC controllers with synchronized configurations for production continuity',
+                        difficulty: 'high',
+                        time: '4-6 weeks',
+                        cost: 'high',
+                        tools: ['Controller Replication', 'High Availability Solutions'],
+                        resources: ['Manufacturing High Availability Best Practices']
+                    }
+                ]
+            },
+            {
+                category: 'supply',
+                icon: 'fas fa-link',
+                title: 'Supply Chain & Third-Party Management',
+                items: [
+                    {
+                        title: 'Vet CNC Vendor Security Practices',
+                        description: 'Conduct security questionnaire and assess vendor security maturity before software/firmware integration',
+                        difficulty: 'medium',
+                        time: '2 weeks',
+                        cost: 'low',
+                        tools: ['Security Assessment Frameworks', 'VSAQ'],
+                        resources: ['NIST SP 800-161 Supply Chain Risk Management']
+                    },
+                    {
+                        title: 'Implement Firmware Verification',
+                        description: 'Verify digital signatures and hash integrity of CNC firmware before installation',
+                        difficulty: 'medium',
+                        time: '1-2 weeks',
+                        cost: 'low',
+                        tools: ['Cryptographic Verification Tools', 'SBOM Analysis'],
+                        resources: ['NIST SP 800-161 Firmware Security']
+                    },
+                    {
+                        title: 'Manage Software Bill of Materials (SBOM)',
+                        description: 'Document all third-party libraries, components, and versions in CNC systems for vulnerability tracking',
+                        difficulty: 'medium',
+                        time: '2 weeks',
+                        cost: 'low',
+                        tools: ['SBOM Generation Tools', 'Cyclone DX', 'SPDX'],
+                        resources: ['NTIA Software Bill of Materials Guidelines']
+                    },
+                    {
+                        title: 'Establish Vendor Maintenance Windows',
+                        description: 'Require scheduled, approved maintenance windows from CNC vendors and contractors',
+                        difficulty: 'low',
+                        time: '1 week',
+                        cost: 'low',
+                        tools: ['Maintenance Tracking System', 'Approval Workflow'],
+                        resources: ['ISO 27001 A.14 Supplier Management']
+                    },
+                    {
+                        title: 'Monitor Vendor Security Advisories',
+                        description: 'Subscribe to CNC manufacturer security alerts and vulnerability notifications',
+                        difficulty: 'low',
+                        time: '3 days',
+                        cost: 'low',
+                        tools: ['NVD Email Alerts', 'Vendor Security Pages'],
+                        resources: ['NVD Notification Service', 'Vendor Security Bulletins']
+                    }
+                ]
+            }
+        ];
+
+        let checklistState = {};
+        const STORAGE_KEY = 'cnc-hardening-checklist';
+
+        function initializeChecklist() {
+            loadProgress();
+            renderChecklist();
+            updateStats();
+
+            document.getElementById('categoryFilter').addEventListener('change', filterChecklist);
+            document.getElementById('difficultyFilter').addEventListener('change', filterChecklist);
+            document.getElementById('searchInput').addEventListener('input', filterChecklist);
+        }
+
+        function renderChecklist() {
+            const container = document.getElementById('checklistContainer');
+            container.innerHTML = '';
+
+            checklistData.forEach((category, categoryIndex) => {
+                const section = document.createElement('div');
+                section.className = 'category-section expanded';
+                section.id = `category-${categoryIndex}`;
+
+                const header = document.createElement('div');
+                header.className = 'category-header';
+                header.onclick = () => toggleCategory(categoryIndex);
+
+                const categoryCompleted = category.items.filter(item => checklistState[getItemId(categoryIndex, item.title)]).length;
+                const categoryTotal = category.items.length;
+
+                header.innerHTML = `
+                    <div class="category-title">
+                        <i class="${category.icon} category-icon"></i>
+                        <span>${category.title}</span>
+                        <span class="category-count">${categoryCompleted}/${categoryTotal}</span>
+                    </div>
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                `;
+
+                const itemsDiv = document.createElement('div');
+                itemsDiv.className = 'checklist-items';
+
+                category.items.forEach((item, itemIndex) => {
+                    const itemEl = createChecklistItem(categoryIndex, item, itemIndex);
+                    itemsDiv.appendChild(itemEl);
+                });
+
+                section.appendChild(header);
+                section.appendChild(itemsDiv);
+                container.appendChild(section);
+            });
+        }
+
+        function createChecklistItem(categoryIndex, item, itemIndex) {
+            const itemId = getItemId(categoryIndex, item.title);
+            const isCompleted = checklistState[itemId] || false;
+
+            const itemEl = document.createElement('div');
+            itemEl.className = `checklist-item ${isCompleted ? 'completed' : ''}`;
+
+            const difficultyClass = `difficulty-${item.difficulty}`;
+            const badgeClass = `badge badge-${item.difficulty}`;
+
+            itemEl.innerHTML = `
+                <div class="item-header">
+                    <input type="checkbox" ${isCompleted ? 'checked' : ''} onchange="toggleItem(${categoryIndex}, '${item.title.replace(/'/g, "\\'")}')">
+                    <span class="item-title">${item.title}</span>
+                    <span class="item-toggle" onclick="toggleDetails(this)"><i class="fas fa-chevron-down"></i></span>
+                </div>
+                <div class="item-details">
+                    <div class="detail-block">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">${item.description}</div>
+                    </div>
+                    <div class="detail-block">
+                        <div class="detail-label">Difficulty</div>
+                        <div class="detail-value"><span class="badge ${badgeClass}">${item.difficulty.charAt(0).toUpperCase() + item.difficulty.slice(1)}</span></div>
+                    </div>
+                    <div class="detail-block">
+                        <div class="detail-label">Time to Implement</div>
+                        <div class="detail-value">${item.time}</div>
+                    </div>
+                    <div class="detail-block">
+                        <div class="detail-label">Resource Cost</div>
+                        <div class="detail-value"><span class="badge ${badgeClass}">${item.cost}</span></div>
+                    </div>
+                    <div class="detail-block">
+                        <div class="detail-label">Tools & Resources</div>
+                        <div class="detail-value">
+                            ${item.tools.map(t => `<div>• ${t}</div>`).join('')}
+                            ${item.resources.map(r => `<div>• <a href="#" class="resource-link">${r}</a></div>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            return itemEl;
+        }
+
+        function toggleItem(categoryIndex, title) {
+            const itemId = getItemId(categoryIndex, title);
+            checklistState[itemId] = !checklistState[itemId];
+            saveProgress();
+            updateStats();
+            renderChecklist();
+        }
+
+        function toggleDetails(element) {
+            const details = element.parentElement.nextElementSibling;
+            details.classList.toggle('visible');
+            element.classList.toggle('active');
+        }
+
+        function toggleCategory(categoryIndex) {
+            const section = document.getElementById(`category-${categoryIndex}`);
+            section.classList.toggle('expanded');
+            section.classList.toggle('collapsed');
+        }
+
+        function getItemId(categoryIndex, title) {
+            return `item-${categoryIndex}-${title}`;
+        }
+
+        function updateStats() {
+            let totalItems = 0;
+            let completedItems = 0;
+
+            checklistData.forEach(category => {
+                category.items.forEach(item => {
+                    totalItems++;
+                    const itemId = getItemId(checklistData.indexOf(category), item.title);
+                    if (checklistState[itemId]) completedItems++;
+                });
+            });
+
+            const percentage = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+
+            document.getElementById('totalItems').textContent = totalItems;
+            document.getElementById('completedItems').textContent = completedItems;
+            document.getElementById('remainingItems').textContent = totalItems - completedItems;
+            document.getElementById('completionPercent').textContent = percentage + '%';
+            document.getElementById('progressFill').style.width = percentage + '%';
+        }
+
+        function saveProgress() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(checklistState));
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                checklistState = JSON.parse(saved);
+            }
+        }
+
+        function resetProgress() {
+            if (confirm('Are you sure? This will reset all progress.')) {
+                checklistState = {};
+                saveProgress();
+                renderChecklist();
+                updateStats();
+            }
+        }
+
+        function expandAll() {
+            document.querySelectorAll('.category-section').forEach(section => {
+                section.classList.add('expanded');
+                section.classList.remove('collapsed');
+            });
+        }
+
+        function collapseAll() {
+            document.querySelectorAll('.category-section').forEach(section => {
+                section.classList.remove('expanded');
+                section.classList.add('collapsed');
+            });
+        }
+
+        function filterChecklist() {
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const difficultyFilter = document.getElementById('difficultyFilter').value;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+            document.querySelectorAll('.category-section').forEach((section, categoryIndex) => {
+                const category = checklistData[categoryIndex];
+                let hasVisibleItems = false;
+
+                const items = section.querySelectorAll('.checklist-item');
+                items.forEach((itemEl, itemIndex) => {
+                    const item = category.items[itemIndex];
+                    let show = true;
+
+                    if (categoryFilter && category.category !== categoryFilter) show = false;
+                    if (difficultyFilter && item.difficulty !== difficultyFilter) show = false;
+                    if (searchTerm && !item.title.toLowerCase().includes(searchTerm) &&
+                        !item.description.toLowerCase().includes(searchTerm)) show = false;
+
+                    itemEl.style.display = show ? 'block' : 'none';
+                    if (show) hasVisibleItems = true;
+                });
+
+                section.style.display = hasVisibleItems ? 'block' : 'none';
+            });
+        }
+
+        function exportAsText() {
+            let text = 'CNC SECURITY HARDENING CHECKLIST\n';
+            text += 'Manufacturing Security Expert - OT/IT Security Framework\n';
+            text += '='.repeat(70) + '\n\n';
+
+            checklistData.forEach((category, categoryIndex) => {
+                text += `\n${category.title.toUpperCase()}\n`;
+                text += '-'.repeat(70) + '\n';
+
+                category.items.forEach((item, itemIndex) => {
+                    const itemId = getItemId(categoryIndex, item.title);
+                    const isCompleted = checklistState[itemId] ? '[✓]' : '[ ]';
+
+                    text += `${isCompleted} ${item.title}\n`;
+                    text += `   Description: ${item.description}\n`;
+                    text += `   Difficulty: ${item.difficulty} | Time: ${item.time} | Cost: ${item.cost}\n`;
+                    text += `   Tools: ${item.tools.join(', ')}\n`;
+                    text += `\n`;
+                });
+            });
+
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'cnc-hardening-checklist.txt';
+            a.click();
+        }
+
+        initializeChecklist();
+    </script>
+</body>
+</html>
